@@ -96,11 +96,20 @@ nearestRoot xs x x' eps = hillClimbSqrt (constructLambda xs 0) x x' eps
 -- Exercise 7
 data Instruction = Add | Subtract | Multiply | Duplicate | Pop deriving (Eq, Show)
 executeInstructionSequence :: [Int] -> [Instruction] -> [Int]
-executeInstructionSequence ns ins = []
+executeInstructionSequence [] ins = []
+executeInstructionSequence ns [] = ns
+executeInstructionSequence [a] _ = [a]
+executeInstructionSequence (x:y:ns) (i:ins) | i==Add = (x+y) : executeInstructionSequence ns ins
+					    | i==Multiply = (x*y) : executeInstructionSequence ns ins
+					    | i==Duplicate = [x,x] ++ executeInstructionSequence (y:ns) ins
+					    | i==Pop = executeInstructionSequence (y:ns) ins
 
 -- Exercise 8
 optimalSequence :: Int -> [Instruction]
-optimalSequence n = [] 
+optimalSequence 1 = []
+optimalSequence 2 = [Duplicate, Multiply]
+optimalSequence n | n `mod` 2 == 0 = optimalSequence (n `div `2) ++ [Duplicate, Multiply]
+		  | otherwise = Duplicate : (optimalSequence (n-1) ++ [Multiply]) 
 
 -- Exercise 9
 findBusyBeavers :: [Int] -> [[Instruction]]
