@@ -55,14 +55,43 @@ classify :: [[ModuleResult]] -> DegreeClass
 classify ms = Third 
 
 -- Exercise 5
--- search for the local maximum of f nearest x using an 
--- approximation margin delta and initial step value s
+-- good version with maximum check
 hillClimb :: (Float -> Float) -> Float -> Float -> Float -> Float
-hillClimb d x x' eps = 0.0
+hillClimb d x x' eps = 
+	let 
+	gr = (sqrt (5) + 1) / 2 
+	a = x' - (x' - x) / gr 
+	b = x  + (x' - x) / gr
+	in if abs (a - b) > eps
+		then if d a > d b 
+				then hillClimb d x b eps
+				else hillClimb d a x' eps
+		else
+			(x' + x) / 2
+
+-- hillClimb to find minimum
+hillClimbSqrt :: (Float -> Float) -> Float -> Float -> Float -> Float
+hillClimbSqrt d x x' eps = 
+	let 
+	gr = (sqrt (5) + 1) / 2 
+	a = x' - (x' - x) / gr 
+	b = x  + (x' - x) / gr
+	in if abs (a - b) > eps
+		then if (d a)^2 < (d b)^2
+				then hillClimbSqrt d x b eps
+				else hillClimbSqrt d a x' eps
+		else
+			(x' + x) / 2
+			
+-- helper function which returns a lambda given a list of coefficients
+constructLambda :: [Float] -> Int -> (Float -> Float)
+constructLambda [] i x = 0
+constructLambda (c:cs) i x = c*(x^i) + constructLambda cs (i+1) x  
 
 -- Exercise 6
+-- make another hillClimb algorithm to find minimum for a fct?
 nearestRoot :: [Float] -> Float -> Float -> Float -> Float
-nearestRoot xs x x' eps = 0.0
+nearestRoot xs x x' eps = hillClimbSqrt (constructLambda xs 0) x x' eps
 
 -- Exercise 7
 data Instruction = Add | Subtract | Multiply | Duplicate | Pop deriving (Eq, Show)
